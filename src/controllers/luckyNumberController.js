@@ -23,3 +23,4 @@ exports.addLuckyNumber = (req, res) => {
         res.json({ message: 'Lucky number added successfully' });
     });
 };
+
