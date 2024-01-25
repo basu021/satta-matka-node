@@ -1,42 +1,54 @@
-// backend/src/server.js
+// server.js
 const express = require('express');
-const bodyParser = require('body-parser');
-const mysql = require('mysql2');
-const jwt = require('jsonwebtoken');
-const authRoutes = require('./routes/v1/authRoutes');  // Correct import
-const authMiddleware = require('./middleware/authMiddleware');
-const luckyNumberRoutes = require('./routes/v1/luckyNumberRoutes');
+const v1Routes = require('./routes/v1');
+const morgan = require('morgan');
+const createError = require('http-errors') 
+const { initDatabase } = require('./helpers/init_mysql');
+
+const AuthRoute = require('./routes/v1/Auth.route');
+
+require('dotenv').config()
+
+const app = express()
+app.use(morgan('dev'))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 
-const app = express();
-const port = 3001;
 
-// MySQL database configuration
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'sattamtka',
+
+// Initialize the MySQL database
+initDatabase()
+
+
+
+// To check if server running
+app.use('/', v1Routes);
+// Auth Routes
+app.use('/auth', AuthRoute);
+
+
+app.use(async (req,res,next) => {
+  // const error = new Error("Not found");
+  // error.status = 404
+  // next(error)
+  next(createError.NotFound());
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-  } else {
-    console.log('Connected to MySQL database');
-  }
+app.use((err,req,res,next) => {
+  res.status(err.status || 500)
+  res.json({
+    error: {
+      status: err.status || 500,
+      message: err.message,
+    }
+  })
 });
 
-app.use(bodyParser.json());
 
-// API versioning middleware
-app.use('/api/v1', authMiddleware); // Add authentication middleware for v1
+// ... other routes and middleware
 
-// API routes
-// app.use('/api/v1', authRoutes);  // Use authRoutes instead of v1Routes
-
-app.use('/api/v1/luckyNumbers', luckyNumberRoutes);
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+const PORT = process.env.PORT || 3005;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

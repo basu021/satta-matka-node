@@ -1,0 +1,25 @@
+GET http://localhost:5003/
+
+### error route
+
+GET http://localhost:5003/ddd
+
+### Register Route
+POST http://localhost:5003/auth/register
+Content-Type: application/json
+
+{
+    "email": "basudevrout2001@gmail.com",
+    "password": "test"
+}
+### Login Route
+POST http://localhost:5003/auth/login
+
+### Logout Route
+POST http://localhost:5003/auth/logout
+
+### Refresh Token
+POST http://localhost:5003/auth/refresh-token
+
+### Refresh Token
+DELETE http://localhost:5003/auth/logout
